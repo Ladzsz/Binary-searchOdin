@@ -62,21 +62,26 @@ class Tree {
 
     //insert method
     insertItem(root, key) {
-        // Create and return a new node if root is null
-        if (root === null)
-        return new Node(key); 
-
-        // Duplicates not allowed
-        if (root.data === key)
-            return root; 
-
-        // Add to left subtree if less than and right if greater
-        if (key < root.data)
-            root.left = this.insertItem(root.left, key); 
-        else if (key > root.data)
-            root.right = this.insertItem(root.right, key); 
-
-        return root;
+        if (typeof key !== 'number') {
+            throw new Error("Only numerical keys are supported.");
+        }
+    
+        // Helper function for insertion in BST
+        const insertHelper = (root, key) => {
+            if (!root) return new Node(key); // Create and return a new node if root is null
+    
+            if (key === root.data) return root; // Avoid duplicates
+    
+            if (key < root.data) {
+                root.left = insertHelper(root.left, key); // Insert into the left subtree
+            } else {
+                root.right = insertHelper(root.right, key); // Insert into the right subtree
+            }
+    
+            return root; // Return the updated root
+        };
+    
+        this.root = insertHelper(this.root, key); // Update the tree's root after insertion
     }
 
     //remove method
@@ -142,12 +147,126 @@ class Tree {
     }
 
     //functions to work on next time
-    levelOrder() {
-
+    levelOrder(callback) {
+        if (!callback || typeof callback !== "function") {
+            throw new Error("A callback function is required.");
+        }
+    
+        const queue = [this.root]; // Initialize queue with the root node
+        while (queue.length > 0) {
+            const current = queue.shift(); // Get the front node
+            if (current) {
+                callback(current); // Process the current node
+                if (current.left) queue.push(current.left); // Add left child to queue
+                if (current.right) queue.push(current.right); // Add right child to queue
+            }
+        }
     }
 
-    inOrder() {
+    //the order functions
+    inOrder(callback) {
+        if (!callback || typeof callback !== "function") {
+            throw new Error("A callback function is required.");
+        }
+    
+        const traverse = (node) => {
+            if (!node) return;
+    
+            traverse(node.left); // Visit left subtree
+            callback(node);      // Process current node
+            traverse(node.right); // Visit right subtree
+        };
+    
+        traverse(this.root); // Start traversal from the root
+    }
+    
+    preOrder(callback) {
+        if (!callback || typeof callback !== "function") {
+            throw new Error("A callback function is required.");
+        }
+    
+        const traverse = (node) => {
+            if (!node) return;
+    
+            callback(node);      // Process current node
+            traverse(node.left); // Visit left subtree
+            traverse(node.right); // Visit right subtree
+        };
+    
+        traverse(this.root); // Start traversal from the root
+    }
+    
+    postOrder(callback) {
+        if (!callback || typeof callback !== "function") {
+            throw new Error("A callback function is required.");
+        }
+    
+        const traverse = (node) => {
+            if (!node) return;
+    
+            traverse(node.left); // Visit left subtree
+            traverse(node.right); // Visit right subtree
+            callback(node);       // Process current node
+        };
+    
+        traverse(this.root); // Start traversal from the root
+    }
 
+    //height function
+    height(node) {
+        if (!node) return -1; // Base case: null node has height -1
+        const leftHeight = this.height(node.left); // Height of left subtree
+        const rightHeight = this.height(node.right); // Height of right subtree
+        return 1 + Math.max(leftHeight, rightHeight); // Add 1 for the current edge
+    }
+
+    //depth function
+    depth(node, current = this.root, level = 0) {
+        if (!node || !current) return -1; // Base case: node not found
+        if (node === current) return level; // Found node, return depth
+
+        // Search in the left and right subtrees
+        const leftDepth = this.depth(node, current.left, level + 1);
+        if (leftDepth !== -1) return leftDepth; // Node found in left subtree
+
+        return this.depth(node, current.right, level + 1); // Continue in right subtree
+    }
+
+    //isbalance function
+    isBalanced(node = this.root) {
+        if (!node) return true; // Base case: null node is balanced
+    
+        // Helper function to calculate height and check balance simultaneously
+        const checkHeight = (node) => {
+            if (!node) return -1; // Null nodes have height -1
+    
+            const leftHeight = checkHeight(node.left); // Height of left subtree
+            const rightHeight = checkHeight(node.right); // Height of right subtree
+    
+            if (leftHeight === false || rightHeight === false || Math.abs(leftHeight - rightHeight) > 1) {
+                return false; // If any subtree is unbalanced or height difference > 1
+            }
+    
+            return 1 + Math.max(leftHeight, rightHeight); // Return height of current node
+        };
+    
+        return checkHeight(node) !== false; // Return true if balanced, false otherwise
+    }
+    
+
+    //rebalance function
+    rebalance() {
+        // Helper function: Perform in-order traversal to collect node values
+        const inOrderTraversal = (node, result = []) => {
+            if (!node) return result;
+            inOrderTraversal(node.left, result);
+            result.push(node.data);
+            inOrderTraversal(node.right, result);
+            return result;
+        };
+
+        const sortedArray = inOrderTraversal(this.root); // Get sorted values
+        this.root = this.buildTree(sortedArray); // Rebuild the tree
     }
 }
 
