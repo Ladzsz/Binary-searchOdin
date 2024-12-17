@@ -9,55 +9,38 @@ class Node {
 
 //tree class
 class Tree {
-    constructor(array) {
-        this.root = this.buildTree(array);
+    constructor() {
+        this.root = null; // Initialize tree root
     }
 
-    //build tree method
     buildTree(arr) {
+        if (!Array.isArray(arr)) {
+            throw new TypeError("Input must be a valid array");
+        }
 
         let n = arr.length;
 
-        if (n === 0)
-            return null;
+        if (n === 0) return null;
 
-        // Create the root node
-        let mid = Math.floor((n - 1) / 2);
-        let root = new Node(arr[mid]);
+        console.log("Building tree with:", arr);
 
-        let q = [ {node : root, range : [ 0, n - 1 ]} ];
-        let frontIndex = 0;
+        // Example placeholder logic: Create a simple binary tree
+        this.root = this._buildTreeHelper(arr, 0, n - 1);
+    }
 
-        while (frontIndex < q.length) {
-            let front = q[frontIndex];
-            let curr = front.node;
-            let [s, e] = front.range;
-            let index = s + Math.floor((e - s) / 2);
+    // Helper function to recursively create a binary tree
+    _buildTreeHelper(arr, start, end) {
+        if (start > end) return null;
 
-            // If left subtree exists
-            if (s < index) {
-                let midLeft
-                    = s + Math.floor((index - 1 - s) / 2);
-                let left = new Node(arr[midLeft]);
-                curr.left = left;
-                q.push({node : left, range : [ s, index - 1 ]});
-            }
+        let mid = Math.floor((start + end) / 2);
 
-            // If right subtree exists
-            if (e > index) {
-                let midRight
-                    = index + 1
-                    + Math.floor((e - index - 1) / 2);
-                let right = new Node(arr[midRight]);
-                curr.right = right;
-                q.push(
-                    {node : right, range : [ index + 1, e ]});
-            }
+        const node = {
+            value: arr[mid],
+            left: this._buildTreeHelper(arr, start, mid - 1),
+            right: this._buildTreeHelper(arr, mid + 1, end),
+        };
 
-            frontIndex++;
-        }
-
-        return root;
+        return node;
     }
 
     //insert method
@@ -286,3 +269,74 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
       prettyPrint(node.left, `${prefix}${isLeft ? "    " : "│   "}`, true);
     }
   };
+
+
+
+
+
+//doing testing here because i got tired of dealing with import errors from not using webpack
+randomNum = [81, 2, 79, 65, 45, 50, 5, 25, 57, 42];
+
+const tree = new Tree();
+
+tree.buildTree(randomNum);
+
+//checking if balanced
+console.log(tree.isBalanced());
+
+// Log each node's value using levelOrder
+tree.levelOrder((node) => {
+    console.log(node.value); 
+});
+
+// Log each node's value using levelOrder
+tree.preOrder((node) => {
+    console.log(node.value); // Log the value of each node
+});
+
+// Log each node's value using levelOrder
+tree.postOrder((node) => {
+    console.log(node.value); // Log the value of each node
+});
+
+// Log each node's value using levelOrder
+tree.inOrder((node) => {
+    console.log(node.value); // Log the value of each node
+});
+
+// Insertingn numbers
+tree.insertItem(tree.root, 104);  
+tree.insertItem(tree.root, 110);
+tree.insertItem(tree.root, 120);
+tree.insertItem(tree.root, 150);
+
+//Confirm the tree is unbalanced
+console.log("Is tree balanced after adding numbers > 100?", tree.isBalanced());
+
+// Rebalance the tree
+tree.rebalance();
+
+//Confirm that the tree is balanced
+console.log("Is tree balanced after rebalancing?", tree.isBalanced());
+
+//Print out all elements in level, pre, post, and in order
+
+
+tree.levelOrder((node) => {
+    console.log(node.value);
+});
+
+
+tree.preOrder((node) => {
+    console.log(node.value);
+});
+
+
+tree.postOrder((node) => {
+    console.log(node.value);
+});
+
+
+tree.inOrder((node) => {
+    console.log(node.value);
+});
